@@ -3,6 +3,7 @@ import Header from './components/Header';
 import SearchEngine, { SearchData } from './components/SearchEngine';
 import SearchResults from './components/SearchResults';
 import DealsExplorer from './components/DealsExplorer';
+import KlookSections from './components/KlookSections';
 import Footer from './components/Footer';
 
 export default function App() {
@@ -27,10 +28,11 @@ export default function App() {
 
       <main>
         {showResults && searchData ? (
-          <SearchResults searchData={searchData} />
+          <SearchResults searchData={searchData} onSearch={handleSearch} />
         ) : (
           <>
             <SearchEngine onSearch={handleSearch} />
+            <KlookSections />
             <DealsExplorer onSearch={handleSearch} />
           </>
         )}

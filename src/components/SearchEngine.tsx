@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plane, Hotel, TrainFront, Car, Search, Calendar, MapPin, ArrowRight, Users, ShieldCheck, Headphones, BadgeCheck } from 'lucide-react';
+import { Plane, Hotel, TrainFront, Car, Search, Calendar, MapPin, ArrowRight, Users, ShieldCheck, Headphones, BadgeCheck, Ticket } from 'lucide-react';
 import { motion, AnimatePresence as FramerAnimatePresence } from 'motion/react';
 import { CalendarSelector, PassengerSelector, LocationSelector } from './BookingSelectors';
 
@@ -73,22 +73,22 @@ export default function SearchEngine({ onSearch }: { onSearch: (data: SearchData
 
   const renderSearchFields = () => {
     return (
-      <div className="bg-white/10 backdrop-blur-2xl border border-white/20 rounded-[40px] p-2 shadow-2xl">
+      <div className="bg-white rounded-[32px] p-2 shadow-2xl border border-trip-border">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-1">
           <div 
-            className={`md:col-span-3 px-8 py-6 hover:bg-white/10 transition-all cursor-pointer group relative rounded-l-[32px] ${showDeparture ? 'bg-white/20' : ''}`}
+            className={`md:col-span-3 px-8 py-6 hover:bg-trip-surface transition-all cursor-pointer group relative rounded-l-[28px] ${showDeparture ? 'bg-trip-surface' : ''}`}
             onClick={() => { setShowDeparture(true); setShowArrival(false); setShowCalendar(false); setShowPassengers(false); }}
           >
-            <label className="text-[10px] font-black text-white/60 uppercase tracking-widest mb-1 block">Départ</label>
+            <label className="text-[10px] font-black text-trip-gray uppercase tracking-widest mb-1 block">Départ</label>
             <div className="flex items-center gap-3">
-              <MapPin className="w-5 h-5 text-white/40 group-hover:text-white transition-colors" />
+              <MapPin className="w-5 h-5 text-trip-primary/40 group-hover:text-trip-primary transition-colors" />
               <input 
                 type="text"
                 value={departure}
                 onChange={(e) => setDeparture(e.target.value)}
                 onFocus={() => { setShowDeparture(true); setShowArrival(false); setShowCalendar(false); setShowPassengers(false); }}
                 placeholder="Ville de départ"
-                className="bg-transparent border-none outline-none font-bold text-white text-lg w-full placeholder:text-white/30"
+                className="bg-transparent border-none outline-none font-bold text-trip-dark text-lg w-full placeholder:text-trip-gray/30"
               />
             </div>
             <AnimatePresence>
@@ -103,19 +103,19 @@ export default function SearchEngine({ onSearch }: { onSearch: (data: SearchData
             </AnimatePresence>
           </div>
           <div 
-            className={`md:col-span-3 px-8 py-6 hover:bg-white/10 transition-all cursor-pointer group relative ${showArrival ? 'bg-white/20' : ''}`}
+            className={`md:col-span-3 px-8 py-6 hover:bg-trip-surface transition-all cursor-pointer group relative ${showArrival ? 'bg-trip-surface' : ''}`}
             onClick={() => { setShowArrival(true); setShowDeparture(false); setShowCalendar(false); setShowPassengers(false); }}
           >
-            <label className="text-[10px] font-black text-white/60 uppercase tracking-widest mb-1 block">Arrivée</label>
+            <label className="text-[10px] font-black text-trip-gray uppercase tracking-widest mb-1 block">Arrivée</label>
             <div className="flex items-center gap-3">
-              <MapPin className="w-5 h-5 text-white/40 group-hover:text-white transition-colors" />
+              <MapPin className="w-5 h-5 text-trip-primary/40 group-hover:text-trip-primary transition-colors" />
               <input 
                 type="text"
                 value={arrival}
                 onChange={(e) => setArrival(e.target.value)}
                 onFocus={() => { setShowArrival(true); setShowDeparture(false); setShowCalendar(false); setShowPassengers(false); }}
                 placeholder="Ville d'arrivée"
-                className="bg-transparent border-none outline-none font-bold text-white text-lg w-full placeholder:text-white/30"
+                className="bg-transparent border-none outline-none font-bold text-trip-dark text-lg w-full placeholder:text-trip-gray/30"
               />
             </div>
             <AnimatePresence>
@@ -131,12 +131,12 @@ export default function SearchEngine({ onSearch }: { onSearch: (data: SearchData
           </div>
           <div 
             onClick={() => { setShowCalendar(!showCalendar); setShowDeparture(false); setShowArrival(false); setShowPassengers(false); }}
-            className={`md:col-span-3 px-8 py-6 hover:bg-white/10 transition-all cursor-pointer group relative ${showCalendar ? 'bg-white/20' : ''}`}
+            className={`md:col-span-3 px-8 py-6 hover:bg-trip-surface transition-all cursor-pointer group relative ${showCalendar ? 'bg-trip-surface' : ''}`}
           >
-            <label className="text-[10px] font-black text-white/60 uppercase tracking-widest mb-1 block">Dates</label>
+            <label className="text-[10px] font-black text-trip-gray uppercase tracking-widest mb-1 block">Dates</label>
             <div className="flex items-center gap-3">
-              <Calendar className="w-5 h-5 text-white/40 group-hover:text-white transition-colors" />
-              <span className="font-bold text-white text-lg">{dates.start} - {dates.end}</span>
+              <Calendar className="w-5 h-5 text-trip-primary/40 group-hover:text-trip-primary transition-colors" />
+              <span className="font-bold text-trip-dark text-lg">{dates.start} - {dates.end}</span>
             </div>
             <AnimatePresence>
               {showCalendar && (
@@ -149,12 +149,12 @@ export default function SearchEngine({ onSearch }: { onSearch: (data: SearchData
           </div>
           <div 
             onClick={() => { setShowPassengers(!showPassengers); setShowCalendar(false); }}
-            className={`md:col-span-3 px-8 py-6 hover:bg-white/10 transition-all cursor-pointer group relative rounded-r-[32px] ${showPassengers ? 'bg-white/20' : ''}`}
+            className={`md:col-span-3 px-8 py-6 hover:bg-trip-surface transition-all cursor-pointer group relative rounded-r-[28px] ${showPassengers ? 'bg-trip-surface' : ''}`}
           >
-            <label className="text-[10px] font-black text-white/60 uppercase tracking-widest mb-1 block">Voyageurs</label>
+            <label className="text-[10px] font-black text-trip-gray uppercase tracking-widest mb-1 block">Voyageurs</label>
             <div className="flex items-center gap-3">
-              <Users className="w-5 h-5 text-white/40 group-hover:text-white transition-colors" />
-              <span className="font-bold text-white text-lg truncate">{passengers.label}</span>
+              <Users className="w-5 h-5 text-trip-primary/40 group-hover:text-trip-primary transition-colors" />
+              <span className="font-bold text-trip-dark text-lg truncate">{passengers.label}</span>
             </div>
             <AnimatePresence>
               {showPassengers && (
@@ -169,10 +169,32 @@ export default function SearchEngine({ onSearch }: { onSearch: (data: SearchData
         <div className="mt-2">
           <button 
             onClick={handleSearchClick}
-            className="w-full py-6 bg-[#00AEEF] text-white rounded-[32px] font-black text-xl uppercase tracking-[0.2em] hover:bg-[#0096ce] transition-all shadow-2xl shadow-[#00AEEF]/40 active:scale-[0.98]"
+            className="w-full py-6 cta-blue rounded-[24px] font-black text-xl uppercase tracking-[0.2em] shadow-xl active:scale-[0.98]"
           >
             CHERCHEUR
           </button>
+        </div>
+
+        {/* Category Bar (Step 1) */}
+        <div className="mt-8 flex justify-center gap-4 md:gap-8 overflow-x-auto no-scrollbar pb-2">
+          {[
+            { icon: Plane, label: 'Vols' },
+            { icon: Hotel, label: 'Hôtels' },
+            { icon: Ticket, label: 'Activités' },
+            { icon: Car, label: 'Transport' }
+          ].map((cat, i) => (
+            <button 
+              key={i}
+              className="flex flex-col items-center gap-2 min-w-[80px] group"
+            >
+              <div className="w-12 h-12 rounded-2xl bg-trip-primary/5 flex items-center justify-center text-trip-primary group-hover:bg-trip-primary group-hover:text-white transition-all duration-300 shadow-sm">
+                <cat.icon className="w-6 h-6" />
+              </div>
+              <span className="text-[10px] font-black uppercase tracking-widest text-trip-gray group-hover:text-trip-primary transition-colors">
+                {cat.label}
+              </span>
+            </button>
+          ))}
         </div>
       </div>
     );
@@ -185,7 +207,7 @@ export default function SearchEngine({ onSearch }: { onSearch: (data: SearchData
         <img 
           src="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&q=80&w=2000" 
           alt="Snowy Mountains" 
-          className="w-full h-full object-cover"
+          className="w-full h-full object-cover fade-in-image"
           referrerPolicy="no-referrer"
         />
         <div className="absolute inset-0 bg-black/30" />
@@ -198,10 +220,10 @@ export default function SearchEngine({ onSearch }: { onSearch: (data: SearchData
           transition={{ duration: 0.8, ease: "easeOut" }}
           className="w-full text-center"
         >
-          <h1 className="text-5xl md:text-7xl font-black text-white tracking-tighter mb-4 drop-shadow-2xl">
+          <h1 className="text-5xl md:text-8xl font-black text-white tracking-tighter mb-4 drop-shadow-2xl uppercase text-shadow-sm">
             Explorez le monde
           </h1>
-          <p className="text-white/80 text-lg font-medium mb-12 uppercase tracking-[0.3em]">Destinations Tendances 2026</p>
+          <p className="text-white/90 text-lg font-black mb-12 uppercase tracking-[0.5em] text-shadow-sm">Destinations Business & Loisirs 2028</p>
           {renderSearchFields()}
         </motion.div>
       </div>

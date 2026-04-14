@@ -4,17 +4,18 @@
 @theme {
   --font-sans: "Outfit", "Inter", ui-sans-serif, system-ui, sans-serif;
   
-  --color-trip-blue: #00B4D8;
-  --color-trip-cyan: #00B4D8;
+  --color-trip-primary: #007BFF;
+  --color-trip-secondary: #FFFFFF;
   --color-trip-bg: #FFFFFF;
-  --color-trip-dark: #1A1A1A;
-  --color-trip-gray: #717171;
-  --color-trip-border: #F0F0F0;
+  --color-trip-surface: #F4F7F6;
+  --color-trip-dark: #333333;
+  --color-trip-gray: #666666;
+  --color-trip-border: #E5E7EB;
 }
 
 @layer base {
   body {
-    @apply bg-white text-trip-dark font-sans antialiased;
+    @apply bg-trip-bg text-trip-dark font-sans antialiased;
   }
 }
 
@@ -26,26 +27,33 @@
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
-  .luxury-shadow {
-    box-shadow: 0 15px 40px rgba(0, 180, 216, 0.06);
+  .blue-glow {
+    box-shadow: 0 0 15px rgba(0, 123, 255, 0.2);
   }
-  .frosted-glass {
-    background-color: rgba(255, 255, 255, 0.8);
+  .frosted-glass-white {
+    background-color: rgba(255, 255, 255, 0.85);
     backdrop-filter: blur(24px);
-    border: 1px solid rgba(255, 255, 255, 0.3);
+    border: 1px solid rgba(0, 123, 255, 0.1);
   }
-  .cta-gradient {
-    background: linear-gradient(to right, #00B4D8, #0077B6);
+  .cta-blue {
+    background-color: #007BFF;
+    color: #FFFFFF;
     transition: all 0.3s ease;
   }
-  .cta-gradient:hover {
-    box-shadow: 0 10px 15px -3px rgba(165, 243, 252, 0.4);
+  .cta-blue:hover {
+    background-color: #0056B3;
+    box-shadow: 0 8px 20px rgba(0, 123, 255, 0.3);
+    transform: translateY(-2px);
   }
-  .card-floating {
+  .card-white {
     border-radius: 24px;
     background-color: #FFFFFF;
-    box-shadow: 0 15px 40px rgba(0, 180, 216, 0.06);
-    border: 1px solid #F9FAFB;
+    border: 1px solid #E5E7EB;
+    transition: all 0.3s ease;
+  }
+  .card-white:hover {
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.05);
+    border-color: rgba(0, 123, 255, 0.2);
   }
   .custom-scrollbar::-webkit-scrollbar {
     width: 6px;
@@ -54,10 +62,17 @@
     background: transparent;
   }
   .custom-scrollbar::-webkit-scrollbar-thumb {
-    background: #E5E7EB;
+    background: #007BFF;
     border-radius: 10px;
   }
-  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-    background: #D1D5DB;
+  .text-shadow-sm {
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  }
+  .fade-in-image {
+    animation: fadeIn 0.8s ease-out forwards;
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: scale(1.05); }
+    to { opacity: 1; transform: scale(1); }
   }
 }
