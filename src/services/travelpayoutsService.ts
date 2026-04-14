@@ -28,11 +28,24 @@ export interface SearchParams {
 /**
  * Fetches the cheapest flight prices from Travelpayouts API via server proxy
  */
-export async function fetchCheapestFlights(origin: string, destination: string): Promise<{ data: Record<string, FlightPrice>, error?: string }> {
+export async function fetchCheapestFlights(params: {
+  origin: string;
+  destination: string;
+  departDate?: string;
+  returnDate?: string;
+  currency?: string;
+}): Promise<{ data: Record<string, FlightPrice>, error?: string }> {
   try {
-    const response = await fetch(
-      `/api/flights/cheap?origin=${origin}&destination=${destination}`
-    );
+    const { origin, destination, departDate, returnDate, currency = 'EUR' } = params;
+    const query = new URLSearchParams({
+      origin,
+      destination,
+      currency,
+      ...(departDate && { departDate }),
+      ...(returnDate && { returnDate }),
+    });
+
+    const response = await fetch(`/api/flights/cheap?${query.toString()}`);
     
     if (!response.ok) {
       const errorData = await response.json();
@@ -49,6 +62,21 @@ export async function fetchCheapestFlights(origin: string, destination: string):
   } catch (error) {
     console.error('Error fetching flights from proxy:', error);
     return { data: {}, error: 'Failed to connect to search server' };
+  }
+}
+
+/**
+ * Searches for locations (cities/airports) via server proxy
+ */
+export async function searchLocations(term: string): Promise<any[]> {
+  if (term.length < 2) return [];
+  try {
+    const response = await fetch(`/api/locations?term=${encodeURIComponent(term)}`);
+    if (!response.ok) return [];
+    return await response.json();
+  } catch (error) {
+    console.error('Error searching locations:', error);
+    return [];
   }
 }
 

@@ -14,8 +14,27 @@ async function startServer() {
   const PORT = 3000;
 
   // API routes
+  app.get("/api/locations", async (req, res) => {
+    const { term } = req.query;
+    if (!term || term.toString().length < 2) {
+      return res.json([]);
+    }
+
+    try {
+      const response = await fetch(`https://autocomplete.travelpayouts.com/places2?term=${term}&locale=fr&types[]=city&types[]=airport`);
+      if (!response.ok) {
+        throw new Error(`Autocomplete API error: ${response.status}`);
+      }
+      const data = await response.json();
+      res.json(data);
+    } catch (error) {
+      console.error("Error fetching locations:", error);
+      res.status(500).json({ error: "Failed to fetch locations" });
+    }
+  });
+
   app.get("/api/flights/cheap", async (req, res) => {
-    const { origin, destination, currency = 'EUR' } = req.query;
+    const { origin, destination, departDate, returnDate, currency = 'EUR' } = req.query;
     // Check both names to be helpful to the user
     const rawToken = process.env.TRAVELPAYOUTS_TOKEN || process.env.VITE_TRAVELPAYOUTS_TOKEN;
     const token = rawToken?.trim();
@@ -31,7 +50,11 @@ async function startServer() {
     }
 
     try {
-      const apiUrl = `https://api.travelpayouts.com/v1/prices/cheap?origin=${origin}&destination=${destination}&token=${token}&currency=${currency}`;
+      let apiUrl = `https://api.travelpayouts.com/v1/prices/cheap?origin=${origin}&destination=${destination}&token=${token}&currency=${currency}`;
+      
+      if (departDate) apiUrl += `&depart_date=${departDate}`;
+      if (returnDate) apiUrl += `&return_date=${returnDate}`;
+
       const response = await fetch(apiUrl);
       
       if (!response.ok) {

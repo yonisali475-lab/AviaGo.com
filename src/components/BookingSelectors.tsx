@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   X, ChevronLeft, ChevronRight, Plus, Minus, 
   Users, Briefcase, Heart, Info, Check, Zap,
-  Calendar as CalendarIcon, Search, MapPin
+  Calendar as CalendarIcon, Search, MapPin, Loader2
 } from 'lucide-react';
+import { searchLocations } from '../services/travelpayoutsService';
 
 interface CalendarSelectorProps {
   onClose: () => void;
@@ -20,6 +21,21 @@ export function CalendarSelector({ onClose, onSelect }: CalendarSelectorProps) {
 
   const prices = {
     12: 150, 13: 185, 14: 160, 15: 145, 16: 190, 17: 155, 18: 165, 19: 140
+  };
+
+  const handleDayClick = (day: number) => {
+    const dateStr = `2026-05-${day.toString().padStart(2, '0')}`;
+    if (!selectedStart || (selectedStart && selectedEnd)) {
+      setSelectedStart(dateStr);
+      setSelectedEnd('');
+    } else {
+      if (new Date(dateStr) < new Date(selectedStart)) {
+        setSelectedStart(dateStr);
+        setSelectedEnd('');
+      } else {
+        setSelectedEnd(dateStr);
+      }
+    }
   };
 
   return (
@@ -62,11 +78,16 @@ export function CalendarSelector({ onClose, onSelect }: CalendarSelectorProps) {
             </div>
             <div className="grid grid-cols-7 gap-1">
               {days.map(day => {
-                const isSelected = (mIdx === 0 && (day === 12 || day === 19));
-                const isInRange = (mIdx === 0 && day > 12 && day < 19);
+                const dateStr = `2026-05-${day.toString().padStart(2, '0')}`;
+                const isSelected = selectedStart === dateStr || selectedEnd === dateStr;
+                const isInRange = selectedStart && selectedEnd && 
+                                 new Date(dateStr) > new Date(selectedStart) && 
+                                 new Date(dateStr) < new Date(selectedEnd);
+                
                 return (
                   <button 
                     key={day}
+                    onClick={() => handleDayClick(day)}
                     className={`relative aspect-square flex flex-col items-center justify-center rounded-xl transition-all ${
                       isSelected ? 'bg-trip-blue text-white shadow-lg shadow-trip-blue/30' : 
                       isInRange ? 'bg-trip-blue/10 text-trip-blue' : 'hover:bg-gray-50'
@@ -78,9 +99,6 @@ export function CalendarSelector({ onClose, onSelect }: CalendarSelectorProps) {
                         <span className={`text-[8px] font-medium mt-0.5 ${isSelected ? 'text-white/80' : 'text-emerald-600'}`}>
                           {prices[day as keyof typeof prices]}€
                         </span>
-                        {day % 3 === 0 && !isSelected && (
-                          <div className="w-1 h-1 rounded-full bg-emerald-500 mt-0.5" />
-                        )}
                       </div>
                     )}
                   </button>
@@ -98,8 +116,10 @@ export function CalendarSelector({ onClose, onSelect }: CalendarSelectorProps) {
         </div>
         <button 
           onClick={() => {
-            onSelect({ start: selectedStart, end: selectedEnd });
-            onClose();
+            if (selectedStart && selectedEnd) {
+              onSelect({ start: selectedStart, end: selectedEnd });
+              onClose();
+            }
           }}
           className="px-8 py-3 bg-trip-blue text-white rounded-2xl font-bold text-sm hover:bg-blue-600 transition-all shadow-lg shadow-trip-blue/20"
         >
@@ -112,7 +132,7 @@ export function CalendarSelector({ onClose, onSelect }: CalendarSelectorProps) {
 
 interface PassengerSelectorProps {
   onClose: () => void;
-  onSelect: (data: any) => void;
+  onSelect: (data: { total: number; label: string; counts: any; cabin: string }) => void;
 }
 
 export function PassengerSelector({ onClose, onSelect }: PassengerSelectorProps) {
@@ -123,8 +143,15 @@ export function PassengerSelector({ onClose, onSelect }: PassengerSelectorProps)
   const updateCount = (type: keyof typeof counts, delta: number) => {
     setCounts(prev => ({
       ...prev,
-      [type]: Math.max(0, prev[type] + delta)
+      [type]: Math.max(type === 'adults' ? 1 : 0, prev[type] + delta)
     }));
+  };
+
+  const handleConfirm = () => {
+    const total = counts.adults + counts.children + counts.infants;
+    const label = `${total} Voyageur${total > 1 ? 's' : ''}, ${cabin}`;
+    onSelect({ total, label, counts, cabin });
+    onClose();
   };
 
   return (
@@ -206,10 +233,7 @@ export function PassengerSelector({ onClose, onSelect }: PassengerSelectorProps)
       </div>
 
       <button 
-        onClick={() => {
-          onSelect({ counts, cabin, assistance });
-          onClose();
-        }}
+        onClick={handleConfirm}
         className="w-full py-4 bg-trip-blue text-white rounded-2xl font-bold text-sm hover:bg-blue-600 transition-all shadow-lg shadow-trip-blue/20"
       >
         Confirmer ({counts.adults + counts.children + counts.infants} Voyageurs)
@@ -220,67 +244,109 @@ export function PassengerSelector({ onClose, onSelect }: PassengerSelectorProps)
 
 interface LocationSelectorProps {
   label: string;
+  searchTerm: string;
   onClose: () => void;
   onSelect: (city: string) => void;
 }
 
-export function LocationSelector({ label, onClose, onSelect }: LocationSelectorProps) {
-  const cities = [
-    { name: 'Paris', code: 'PAR', country: 'France' },
-    { name: 'Nice', code: 'NCE', country: 'France' },
-    { name: 'Kyoto', code: 'KIX', country: 'Japon' },
-    { name: 'Tokyo', code: 'NRT', country: 'Japon' },
-    { name: 'New York', code: 'JFK', country: 'USA' },
-    { name: 'Londres', code: 'LHR', country: 'UK' },
+export function LocationSelector({ label, searchTerm, onClose, onSelect }: LocationSelectorProps) {
+  const [results, setResults] = useState<any[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+
+  const popularCities = [
+    { name: 'Paris', code: 'PAR', country_name: 'France' },
+    { name: 'Tokyo', code: 'TYO', country_name: 'Japon' },
+    { name: 'New York', code: 'NYC', country_name: 'USA' },
+    { name: 'Londres', code: 'LON', country_name: 'UK' },
+    { name: 'Dubaï', code: 'DXB', country_name: 'Émirats' },
   ];
+
+  useEffect(() => {
+    const delayDebounceFn = setTimeout(async () => {
+      if (searchTerm.length >= 2) {
+        setIsSearching(true);
+        const data = await searchLocations(searchTerm);
+        setResults(data);
+        setIsSearching(false);
+      } else {
+        setResults([]);
+      }
+    }, 300);
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [searchTerm]);
 
   return (
     <motion.div 
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: 10 }}
-      className="absolute top-full left-0 mt-4 bg-white rounded-[32px] shadow-2xl border border-gray-100 p-6 z-50 w-[350px]"
+      className="absolute top-full left-0 mt-4 bg-white rounded-[32px] shadow-2xl border border-gray-100 p-6 z-50 w-[400px] max-w-[95vw]"
     >
-      <div className="flex items-center justify-between mb-6">
-        <h3 className="text-sm font-black text-trip-dark uppercase tracking-widest">{label}</h3>
-        <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-full transition-colors">
-          <X className="w-4 h-4 text-trip-gray" />
-        </button>
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-[10px] font-black text-trip-gray uppercase tracking-widest">{label}</h3>
+        {isSearching && (
+          <Loader2 className="w-4 h-4 text-trip-blue animate-spin" />
+        )}
       </div>
 
-      <div className="relative mb-6">
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-trip-gray" />
-        <input 
-          type="text" 
-          placeholder="Rechercher une ville..." 
-          className="w-full pl-10 pr-4 py-3 bg-gray-50 rounded-xl outline-none font-bold text-trip-dark border border-transparent focus:border-trip-blue transition-all"
-          autoFocus
-        />
-      </div>
-
-      <div className="space-y-2">
-        <p className="text-[10px] font-black text-trip-gray uppercase tracking-widest mb-2">Destinations populaires</p>
-        {cities.map((city) => (
-          <button 
-            key={city.code}
-            onClick={() => {
-              onSelect(`${city.name} (${city.code})`);
-              onClose();
-            }}
-            className="w-full flex items-center justify-between p-3 hover:bg-trip-blue/5 rounded-xl transition-all group"
-          >
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center group-hover:bg-trip-blue/10 transition-colors">
-                <MapPin className="w-4 h-4 text-trip-gray group-hover:text-trip-blue" />
+      <div className="space-y-1 max-h-[350px] overflow-y-auto custom-scrollbar pr-2">
+        {searchTerm.length < 2 ? (
+          <>
+            <p className="text-[10px] font-black text-trip-gray uppercase tracking-widest mb-2 px-3">Destinations populaires</p>
+            {popularCities.map((city) => (
+              <button 
+                key={city.code}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onSelect(`${city.name} (${city.code})`);
+                  onClose();
+                }}
+                className="w-full flex items-center justify-between p-3 hover:bg-trip-blue/5 rounded-2xl transition-all group"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-xl bg-gray-50 flex items-center justify-center group-hover:bg-trip-blue/10 transition-colors">
+                    <MapPin className="w-4 h-4 text-trip-gray group-hover:text-trip-blue" />
+                  </div>
+                  <div className="text-left">
+                    <p className="text-sm font-black text-trip-dark">{city.name}</p>
+                    <p className="text-[10px] font-bold text-trip-gray uppercase tracking-widest">{city.country_name}</p>
+                  </div>
+                </div>
+                <span className="text-xs font-black text-trip-blue opacity-0 group-hover:opacity-100 transition-all">{city.code}</span>
+              </button>
+            ))}
+          </>
+        ) : results.length > 0 ? (
+          results.map((item: any, index: number) => (
+            <button 
+              key={`${item.code}-${item.type}-${index}`}
+              onClick={(e) => {
+                e.stopPropagation();
+                onSelect(`${item.name} (${item.code})`);
+                onClose();
+              }}
+              className="w-full flex items-center justify-between p-3 hover:bg-trip-blue/5 rounded-2xl transition-all group"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-xl bg-gray-50 flex items-center justify-center group-hover:bg-trip-blue/10 transition-colors">
+                  <MapPin className="w-4 h-4 text-trip-gray group-hover:text-trip-blue" />
+                </div>
+                <div className="text-left">
+                  <p className="text-sm font-black text-trip-dark">{item.name}</p>
+                  <p className="text-[10px] font-bold text-trip-gray uppercase tracking-widest">
+                    {item.country_name} {item.type === 'airport' ? '• Aéroport' : ''}
+                  </p>
+                </div>
               </div>
-              <div className="text-left">
-                <p className="text-sm font-black text-trip-dark">{city.name}</p>
-                <p className="text-[10px] font-bold text-trip-gray uppercase tracking-widest">{city.country}</p>
-              </div>
-            </div>
-            <span className="text-xs font-black text-trip-blue opacity-0 group-hover:opacity-100 transition-all">{city.code}</span>
-          </button>
-        ))}
+              <span className="text-xs font-black text-trip-blue opacity-0 group-hover:opacity-100 transition-all">{item.code}</span>
+            </button>
+          ))
+        ) : !isSearching && (
+          <div className="py-8 text-center">
+            <p className="text-sm font-bold text-trip-gray">Aucun résultat pour "{searchTerm}"</p>
+          </div>
+        )}
       </div>
     </motion.div>
   );
