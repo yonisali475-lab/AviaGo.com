@@ -1,0 +1,50 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Outfit:wght@300;400;500;600;700;800;900&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Outfit", "Inter", ui-sans-serif, system-ui, sans-serif;
+  
+  --color-trip-blue: #00B4D8;
+  --color-trip-cyan: #00B4D8;
+  --color-trip-bg: #FFFFFF;
+  --color-trip-dark: #1A1A1A;
+  --color-trip-gray: #717171;
+  --color-trip-border: #F0F0F0;
+}
+
+@layer base {
+  body {
+    @apply bg-white text-trip-dark font-sans antialiased;
+  }
+}
+
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .luxury-shadow {
+    box-shadow: 0 15px 40px rgba(0, 180, 216, 0.06);
+  }
+  .frosted-glass {
+    background-color: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(24px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+  }
+  .cta-gradient {
+    background: linear-gradient(to right, #00B4D8, #0077B6);
+    transition: all 0.3s ease;
+  }
+  .cta-gradient:hover {
+    box-shadow: 0 10px 15px -3px rgba(165, 243, 252, 0.4);
+  }
+  .card-floating {
+    border-radius: 24px;
+    background-color: #FFFFFF;
+    box-shadow: 0 15px 40px rgba(0, 180, 216, 0.06);
+    border: 1px solid #F9FAFB;
+  }
+}
