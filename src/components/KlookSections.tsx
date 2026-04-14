@@ -1,5 +1,5 @@
 import { motion } from 'motion/react';
-import { Star, ArrowRight, Clock, MapPin } from 'lucide-react';
+import { Star, ArrowRight, Clock, MapPin, TrainFront } from 'lucide-react';
 
 const weeklyDeals = [
   {
@@ -52,21 +52,21 @@ const topActivities = [
   },
   {
     id: 2,
-    title: 'Excursion au Mont Fuji',
-    image: 'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?auto=format&fit=crop&q=80&w=800',
-    rating: 4.8,
-    reviews: '8,920',
-    price: 89,
+    title: 'Pass Journalier Disneyland Tokyo',
+    image: 'https://images.unsplash.com/photo-1545153996-e01b50d6ec38?auto=format&fit=crop&q=80&w=1200',
+    rating: 5.0,
+    reviews: '2,000+',
+    price: 78,
     location: 'Tokyo, Japon'
   },
   {
     id: 3,
-    title: 'Billet Burj Khalifa (124e étage)',
-    image: 'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&q=80&w=800',
-    rating: 4.7,
-    reviews: '25,100',
-    price: 42,
-    location: 'Dubaï, EAU'
+    title: 'Authentique Safari Photo - 3 jours',
+    image: 'https://images.unsplash.com/photo-1523800378286-dae1f0dae656?auto=format&fit=crop&q=80&w=1200',
+    rating: 5.0,
+    reviews: '1,500+',
+    price: 450,
+    location: 'Serengeti, Afrique'
   }
 ];
 
@@ -118,6 +118,63 @@ export default function KlookSections() {
               </div>
             </motion.div>
           ))}
+        </div>
+      </section>
+
+      {/* ÉTAPE 2.5 : Section Trains */}
+      <section className="max-w-7xl mx-auto">
+        <div className="flex items-center justify-between mb-10">
+          <div>
+            <h2 className="text-3xl font-black text-trip-dark tracking-tighter uppercase mb-2">Voyages en Train</h2>
+            <p className="text-trip-gray font-bold text-xs uppercase tracking-widest">Traversez les continents avec élégance et confort</p>
+          </div>
+          <button className="flex items-center gap-2 text-trip-primary font-black text-xs uppercase tracking-widest hover:gap-3 transition-all">
+            Explorer les lignes <ArrowRight className="w-4 h-4" />
+          </button>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <motion.div 
+            whileHover={{ scale: 1.02 }}
+            className="relative h-64 rounded-[32px] overflow-hidden group cursor-pointer shadow-xl"
+          >
+            <img 
+              src="https://images.unsplash.com/photo-1474487548417-781cb71495f3?auto=format&fit=crop&q=80&w=1200" 
+              alt="Eurostar" 
+              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000"
+              referrerPolicy="no-referrer"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+            <div className="absolute bottom-8 left-8">
+              <div className="flex items-center gap-2 mb-2">
+                <TrainFront className="w-5 h-5 text-trip-primary" />
+                <span className="text-xs font-black text-white uppercase tracking-widest">Ligne Grande Vitesse</span>
+              </div>
+              <h3 className="text-2xl font-black text-white uppercase tracking-tighter mb-1">Eurostar Paris-Londres</h3>
+              <p className="text-white/70 text-sm font-bold">Dès 49 € • Centre-ville à centre-ville</p>
+            </div>
+          </motion.div>
+
+          <motion.div 
+            whileHover={{ scale: 1.02 }}
+            className="relative h-64 rounded-[32px] overflow-hidden group cursor-pointer shadow-xl"
+          >
+            <img 
+              src="https://images.unsplash.com/photo-1532105956691-9a3a0dbda997?auto=format&fit=crop&q=80&w=1200" 
+              alt="Transsibérien" 
+              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000"
+              referrerPolicy="no-referrer"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+            <div className="absolute bottom-8 left-8">
+              <div className="flex items-center gap-2 mb-2">
+                <TrainFront className="w-5 h-5 text-trip-primary" />
+                <span className="text-xs font-black text-white uppercase tracking-widest">Expédition Légendaire</span>
+              </div>
+              <h3 className="text-2xl font-black text-white uppercase tracking-tighter mb-1">Expédition Transsibérienne</h3>
+              <p className="text-white/70 text-sm font-bold">Une aventure épique à travers 8 fuseaux horaires</p>
+            </div>
+          </motion.div>
         </div>
       </section>
 

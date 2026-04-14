@@ -179,8 +179,9 @@ export default function SearchEngine({ onSearch }: { onSearch: (data: SearchData
         <div className="mt-8 flex justify-center gap-4 md:gap-8 overflow-x-auto no-scrollbar pb-2">
           {[
             { icon: Plane, label: 'Vols' },
-            { icon: Hotel, label: 'Hôtels' },
+            { icon: TrainFront, label: 'Trains' },
             { icon: Ticket, label: 'Activités' },
+            { icon: Hotel, label: 'Hôtels' },
             { icon: Car, label: 'Transport' }
           ].map((cat, i) => (
             <button 
@@ -220,10 +221,10 @@ export default function SearchEngine({ onSearch }: { onSearch: (data: SearchData
           transition={{ duration: 0.8, ease: "easeOut" }}
           className="w-full text-center"
         >
-          <h1 className="text-5xl md:text-8xl font-black text-white tracking-tighter mb-4 drop-shadow-2xl uppercase text-shadow-sm">
-            Explorez le monde
+          <h1 className="text-4xl md:text-7xl font-black text-white tracking-tighter mb-4 drop-shadow-2xl uppercase text-shadow-sm">
+            Explorez le monde sans limites avec AviaGo
           </h1>
-          <p className="text-white/90 text-lg font-black mb-12 uppercase tracking-[0.5em] text-shadow-sm">Destinations Business & Loisirs 2028</p>
+          <p className="text-white/90 text-lg font-black mb-12 uppercase tracking-[0.5em] text-shadow-sm">Destinations Business & Loisirs</p>
           {renderSearchFields()}
         </motion.div>
       </div>
