@@ -52,21 +52,21 @@ const topActivities = [
   },
   {
     id: 2,
-    title: 'Pass Journalier Disneyland Tokyo',
-    image: 'https://images.unsplash.com/photo-1545153996-e01b50d6ec38?auto=format&fit=crop&q=80&w=1200',
-    rating: 5.0,
-    reviews: '2,000+',
-    price: 78,
+    title: 'Disneyland Tokyo - Pass 1 Jour',
+    image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&q=80&w=1200',
+    rating: 4.9,
+    reviews: '3,450',
+    price: 55,
     location: 'Tokyo, Japon'
   },
   {
     id: 3,
-    title: 'Authentique Safari Photo - 3 jours',
-    image: 'https://images.unsplash.com/photo-1523800378286-dae1f0dae656?auto=format&fit=crop&q=80&w=1200',
+    title: 'Safari Privé - Réserve du Masai Mara',
+    image: 'https://images.unsplash.com/photo-1516426122078-c23e76319801?auto=format&fit=crop&q=80&w=1200',
     rating: 5.0,
-    reviews: '1,500+',
-    price: 450,
-    location: 'Serengeti, Afrique'
+    reviews: '1,280',
+    price: 120,
+    location: 'Masai Mara, Afrique'
   }
 ];
 
