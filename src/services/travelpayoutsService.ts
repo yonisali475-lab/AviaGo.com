@@ -3,7 +3,14 @@
  * Documentation: https://support.travelpayouts.com/hc/en-us/articles/203956163-Travelpayouts-Data-API
  */
 
-const MARKER = import.meta.env.VITE_TRAVELPAYOUTS_MARKER || '12345'; // Default marker if not set
+const MARKER = import.meta.env.VITE_TRAVELPAYOUTS_MARKER || '12345';
+const TOKEN = import.meta.env.VITE_TRAVELPAYOUTS_TOKEN;
+
+// Debug logs (dev only)
+if (import.meta.env.DEV) {
+  console.log("AviaGo: Travelpayouts Marker utilisé :", MARKER);
+  console.log("AviaGo: Travelpayouts Token actif :", TOKEN ? "Configuré ✅" : "Manquant ❌");
+}
 
 export interface FlightPrice {
   price: number;
@@ -101,7 +108,27 @@ export function getBookingUrl(params: SearchParams): string {
     with_request: 'true'
   });
 
-  return `${baseUrl}?${query.toString()}`;
+  const url = `${baseUrl}?${query.toString()}`;
+  console.log("AviaGo: Flight Booking URL généré :", url);
+  return url;
+}
+
+/**
+ * Generates a Booking.com affiliate URL
+ */
+export function getHotelBookingUrl(destination: string, checkIn: string, checkOut: string): string {
+  // Format: https://www.booking.com/searchresults.html?ss=Paris&checkin=2026-06-15&checkout=2026-06-20&aid=YOUR_MARKER
+  const baseUrl = 'https://www.booking.com/searchresults.html';
+  const query = new URLSearchParams({
+    ss: destination,
+    checkin: checkIn,
+    checkout: checkOut,
+    aid: MARKER // Using the same marker for simplicity, though Booking.com usually uses a different AID
+  });
+
+  const url = `${baseUrl}?${query.toString()}`;
+  console.log("AviaGo: Hotel Booking URL généré :", url);
+  return url;
 }
 
 /**

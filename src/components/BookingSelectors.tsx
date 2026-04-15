@@ -3,7 +3,8 @@ import { motion, AnimatePresence } from 'motion/react';
 import { 
   X, ChevronLeft, ChevronRight, Plus, Minus, 
   Users, Briefcase, Heart, Info, Check, Zap,
-  Calendar as CalendarIcon, Search, MapPin, Loader2
+  Calendar as CalendarIcon, Search, MapPin, Loader2,
+  Plane, Building, Train, Car, Ticket
 } from 'lucide-react';
 import { searchLocations } from '../services/travelpayoutsService';
 
@@ -43,6 +44,7 @@ export function CalendarSelector({ onClose, onSelect }: CalendarSelectorProps) {
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.95 }}
+      onClick={(e) => e.stopPropagation()}
       className="absolute top-full left-0 mt-4 bg-white rounded-[40px] shadow-2xl border border-gray-100 p-8 z-50 w-[700px] max-w-[95vw]"
     >
       <div className="flex items-center justify-between mb-8">
@@ -115,7 +117,8 @@ export function CalendarSelector({ onClose, onSelect }: CalendarSelectorProps) {
           <span className="text-xs font-bold">Dates flexibles (+/- 3 jours) activé</span>
         </div>
         <button 
-          onClick={() => {
+          onClick={(e) => {
+            e.stopPropagation();
             if (selectedStart && selectedEnd) {
               onSelect({ start: selectedStart, end: selectedEnd });
               onClose();
@@ -123,7 +126,7 @@ export function CalendarSelector({ onClose, onSelect }: CalendarSelectorProps) {
           }}
           className="px-8 py-3 bg-trip-blue text-white rounded-2xl font-bold text-sm hover:bg-blue-600 transition-all shadow-lg shadow-trip-blue/20"
         >
-          Confirmer les dates
+          Appliquer
         </button>
       </div>
     </motion.div>
@@ -159,6 +162,7 @@ export function PassengerSelector({ onClose, onSelect }: PassengerSelectorProps)
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.95 }}
+      onClick={(e) => e.stopPropagation()}
       className="absolute top-full right-0 mt-4 bg-white rounded-[40px] shadow-2xl border border-gray-100 p-8 z-50 w-[400px] max-w-[95vw]"
     >
       <div className="flex items-center justify-between mb-8">
@@ -233,10 +237,13 @@ export function PassengerSelector({ onClose, onSelect }: PassengerSelectorProps)
       </div>
 
       <button 
-        onClick={handleConfirm}
+        onClick={(e) => {
+          e.stopPropagation();
+          handleConfirm();
+        }}
         className="w-full py-4 bg-trip-blue text-white rounded-2xl font-bold text-sm hover:bg-blue-600 transition-all shadow-lg shadow-trip-blue/20"
       >
-        Confirmer ({counts.adults + counts.children + counts.infants} Voyageurs)
+        Terminé ({counts.adults + counts.children + counts.infants} Voyageurs)
       </button>
     </motion.div>
   );
@@ -245,28 +252,50 @@ export function PassengerSelector({ onClose, onSelect }: PassengerSelectorProps)
 interface LocationSelectorProps {
   label: string;
   searchTerm: string;
+  activeService: string;
   onClose: () => void;
-  onSelect: (city: string) => void;
+  onSelect: (city: string, coords?: { lat: number; lng: number }) => void;
 }
 
-export function LocationSelector({ label, searchTerm, onClose, onSelect }: LocationSelectorProps) {
+export function LocationSelector({ label, searchTerm, activeService, onClose, onSelect }: LocationSelectorProps) {
   const [results, setResults] = useState<any[]>([]);
   const [isSearching, setIsSearching] = useState(false);
 
   const popularCities = [
-    { name: 'Paris', code: 'PAR', country_name: 'France' },
-    { name: 'Tokyo', code: 'TYO', country_name: 'Japon' },
-    { name: 'New York', code: 'NYC', country_name: 'USA' },
-    { name: 'Londres', code: 'LON', country_name: 'UK' },
-    { name: 'Dubaï', code: 'DXB', country_name: 'Émirats' },
+    { name: 'Paris', code: 'PAR', country_name: 'France', type: 'city' },
+    { name: 'Tokyo', code: 'TYO', country_name: 'Japon', type: 'city' },
+    { name: 'New York', code: 'NYC', country_name: 'USA', type: 'city' },
+    { name: 'Londres', code: 'LON', country_name: 'UK', type: 'city' },
+    { name: 'Dubaï', code: 'DXB', country_name: 'Émirats', type: 'city' },
   ];
 
   useEffect(() => {
     const delayDebounceFn = setTimeout(async () => {
-      if (searchTerm.length >= 2) {
+      // Déclenche la recherche seulement après 3 caractères saisis
+      if (searchTerm.length >= 3) {
         setIsSearching(true);
         const data = await searchLocations(searchTerm);
-        setResults(data);
+        
+        // Filtrage Intelligent
+        let filtered = data;
+        if (activeService === 'flights') {
+          // Vols : seulement aéroports et villes avec code IATA
+          filtered = data.filter((item: any) => (item.type === 'airport' || item.type === 'city') && item.code);
+        } else if (activeService === 'hotels') {
+          // Hôtels : villes et hôtels
+          filtered = data.filter((item: any) => item.type === 'city' || item.type === 'hotel');
+        } else if (activeService === 'trains') {
+          // Trains : gares ferroviaires
+          filtered = data.filter((item: any) => item.type === 'station');
+        } else if (activeService === 'cars') {
+          // Voitures : agences de location (souvent aéroports ou gares)
+          filtered = data.filter((item: any) => item.type === 'airport' || item.type === 'station' || item.type === 'city');
+        } else if (activeService === 'activities') {
+          // Activités : parcs, attractions (souvent marqués comme 'hotel' ou 'city' dans places2)
+          filtered = data.filter((item: any) => item.type === 'hotel' || item.type === 'city');
+        }
+        
+        setResults(filtered);
         setIsSearching(false);
       } else {
         setResults([]);
@@ -274,13 +303,27 @@ export function LocationSelector({ label, searchTerm, onClose, onSelect }: Locat
     }, 300);
 
     return () => clearTimeout(delayDebounceFn);
-  }, [searchTerm]);
+  }, [searchTerm, activeService]);
+
+  const getIcon = (type: string) => {
+    switch (type) {
+      case 'airport': return <Plane className="w-4 h-4 text-trip-gray group-hover:text-trip-blue" />;
+      case 'hotel': return <Building className="w-4 h-4 text-trip-gray group-hover:text-trip-blue" />;
+      case 'station': return <Train className="w-4 h-4 text-trip-gray group-hover:text-trip-blue" />;
+      case 'city': 
+        if (activeService === 'cars') return <Car className="w-4 h-4 text-trip-gray group-hover:text-trip-blue" />;
+        if (activeService === 'activities') return <Ticket className="w-4 h-4 text-trip-gray group-hover:text-trip-blue" />;
+        return <MapPin className="w-4 h-4 text-trip-gray group-hover:text-trip-blue" />;
+      default: return <MapPin className="w-4 h-4 text-trip-gray group-hover:text-trip-blue" />;
+    }
+  };
 
   return (
     <motion.div 
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: 10 }}
+      onClick={(e) => e.stopPropagation()}
       className="absolute top-full left-0 mt-4 bg-white rounded-[32px] shadow-2xl border border-gray-100 p-6 z-50 w-[400px] max-w-[95vw]"
     >
       <div className="flex items-center justify-between mb-4">
@@ -291,7 +334,7 @@ export function LocationSelector({ label, searchTerm, onClose, onSelect }: Locat
       </div>
 
       <div className="space-y-1 max-h-[350px] overflow-y-auto custom-scrollbar pr-2">
-        {searchTerm.length < 2 ? (
+        {searchTerm.length < 3 ? (
           <>
             <p className="text-[10px] font-black text-trip-gray uppercase tracking-widest mb-2 px-3">Destinations populaires</p>
             {popularCities.map((city) => (
@@ -299,14 +342,18 @@ export function LocationSelector({ label, searchTerm, onClose, onSelect }: Locat
                 key={city.code}
                 onClick={(e) => {
                   e.stopPropagation();
-                  onSelect(`${city.name} (${city.code})`);
+                  // Formatage selon le service
+                  const displayValue = activeService === 'flights' 
+                    ? `${city.name} (${city.code})` 
+                    : city.name;
+                  onSelect(displayValue, { lat: 48.8566, lng: 2.3522 });
                   onClose();
                 }}
                 className="w-full flex items-center justify-between p-3 hover:bg-trip-blue/5 rounded-2xl transition-all group"
               >
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 rounded-xl bg-gray-50 flex items-center justify-center group-hover:bg-trip-blue/10 transition-colors">
-                    <MapPin className="w-4 h-4 text-trip-gray group-hover:text-trip-blue" />
+                    {getIcon(city.type)}
                   </div>
                   <div className="text-left">
                     <p className="text-sm font-black text-trip-dark">{city.name}</p>
@@ -321,21 +368,34 @@ export function LocationSelector({ label, searchTerm, onClose, onSelect }: Locat
           results.map((item: any, index: number) => (
             <button 
               key={`${item.code}-${item.type}-${index}`}
-              onClick={(e) => {
+            onClick={(e) => {
                 e.stopPropagation();
-                onSelect(`${item.name} (${item.code})`);
+                const coords = item.coordinates ? { lat: item.coordinates.lat, lng: item.coordinates.lon } : undefined;
+                
+                // Formatage selon le service
+                // RÈGLE CRITIQUE : Nom complet pour hôtels et activités
+                let displayValue = item.name;
+                
+                if (activeService === 'flights' && item.code) {
+                  displayValue = `${item.name} (${item.code})`;
+                } else if (activeService === 'hotels' || activeService === 'activities') {
+                  // On garde le nom complet de l'entité
+                  displayValue = item.name;
+                }
+                  
+                onSelect(displayValue, coords);
                 onClose();
               }}
               className="w-full flex items-center justify-between p-3 hover:bg-trip-blue/5 rounded-2xl transition-all group"
             >
               <div className="flex items-center gap-3">
                 <div className="w-8 h-8 rounded-xl bg-gray-50 flex items-center justify-center group-hover:bg-trip-blue/10 transition-colors">
-                  <MapPin className="w-4 h-4 text-trip-gray group-hover:text-trip-blue" />
+                  {getIcon(item.type)}
                 </div>
                 <div className="text-left">
                   <p className="text-sm font-black text-trip-dark">{item.name}</p>
                   <p className="text-[10px] font-bold text-trip-gray uppercase tracking-widest">
-                    {item.country_name} {item.type === 'airport' ? '• Aéroport' : ''}
+                    {item.country_name} {item.type === 'airport' ? '• Aéroport' : item.type === 'station' ? '• Gare' : item.type === 'hotel' ? '• Établissement' : ''}
                   </p>
                 </div>
               </div>

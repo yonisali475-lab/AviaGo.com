@@ -21,7 +21,8 @@ async function startServer() {
     }
 
     try {
-      const response = await fetch(`https://autocomplete.travelpayouts.com/places2?term=${term}&locale=fr&types[]=city&types[]=airport`);
+      // Inclure 'station' pour les trains et 'hotel' pour les hébergements
+      const response = await fetch(`https://autocomplete.travelpayouts.com/places2?term=${term}&locale=fr&types[]=city&types[]=airport&types[]=hotel&types[]=station`);
       if (!response.ok) {
         throw new Error(`Autocomplete API error: ${response.status}`);
       }
